@@ -12,7 +12,11 @@ module Fastlane
         require 'faraday_middleware'
 
         options = {
-          url: "https://public-api.rustore.ru"
+          url: "https://public-api.rustore.ru",
+          request: {
+            open_timeout: 3600,
+            timeout: 3600
+          },
         }
 
         logger = Logger.new($stderr)
