@@ -22,23 +22,36 @@ module Fastlane
         gms_apk = params[:gms_apk]
 
         # Получение токена
+        UI.message("Obtaining API Authentication Token")
         token = Helper::RustoreHelper.get_token(key_id: key_id, private_key: private_key)
+
         # Создание черновика
+        UI.message("Creating version draft")
         draft_id = Helper::RustoreHelper.create_draft(token, package_name, publish_type, changelog_path)
+        UI.message("Successfully created draft with id #{draft_id}")
+
         if aab.nil? && gms_apk.nil?
           raise "The aab or gms_apk parameter is not specified"
         end
 
         # Загрузка aab
         if aab
+          UI.message("Uploading android app bundle to draft with id #{draft_id}")
           Helper::RustoreHelper.upload_app(token, draft_id, false, aab, package_name, true)
+          UI.message("Succesfully uploaded android app bundle to draft with id #{draft_id}")
         end
         # Если нет aab, то загружаем апк
         if gms_apk && aab.nil?
+          UI.message("Uploading APK to draft with id #{draft_id}")
           Helper::RustoreHelper.upload_app(token, draft_id, false, gms_apk, package_name, false)
+          UI.message("Succesfully uploaded APK to draft with id #{draft_id}")
         end
+
+        UI.message("Waiting for 30 seconds")
         sleep(30)
+
         # Отправка на модерацию
+        UI.message("Sending to app review - #{draft_id}")
         Helper::RustoreHelper.commit_version(token, draft_id, package_name)
       end
 
